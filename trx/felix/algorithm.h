@@ -14,10 +14,10 @@
 
 namespace trx {
 //! helper function/class templates for the current header
-namespace detail_trx {
+namespace detail_algorithm_trx {
 //! sort's helper for std::list and std::forward_list
 template <class T, class Allo, template <class, class> class Container>
-std::enable_if_t<
+inline std::enable_if_t<
     std::is_same<Container<T, Allo>, std::list<T, Allo> >::value ||
     std::is_same<Container<T, Allo>, std::forward_list<T, Allo> >::value,
     void> sort_impl(Container<T, Allo> &container) {
@@ -26,7 +26,7 @@ std::enable_if_t<
 
 //! sort's helper for std::vector and std::deque
 template <class T, class Allo, template <class, class> class Container>
-std::enable_if_t<
+inline std::enable_if_t<
     std::is_same<Container<T, Allo>, std::vector<T, Allo> >::value ||
     std::is_same<Container<T, Allo>, std::deque<T, Allo> >::value,
     void> sort_impl(Container<T, Allo> &container) {
@@ -35,11 +35,37 @@ std::enable_if_t<
 
 //! sort's helper for std::array
 template <class T, size_t N>
-void sort_impl(std::array<T, N> &container) {
+inline void sort_impl(std::array<T, N> &container) {
   std::sort(container.begin(), container.end());
 }
 
-} // namespace detail_trx
+//! sort's(comp) helper for std::list and std::forward_list
+template <class T, class Allo, template <class, class> class Container,
+          class Comp>
+inline std::enable_if_t<
+    std::is_same<Container<T, Allo>, std::list<T, Allo> >::value ||
+    std::is_same<Container<T, Allo>, std::forward_list<T, Allo> >::value,
+    void> sort_impl(Container<T, Allo> &container, Comp &comp) {
+  container.sort(comp);
+}
+
+//! sort's(comp) helper for std::vector and std::deque
+template <class T, class Allo, template <class, class> class Container,
+          class Comp>
+inline std::enable_if_t<
+    std::is_same<Container<T, Allo>, std::vector<T, Allo> >::value ||
+    std::is_same<Container<T, Allo>, std::deque<T, Allo> >::value,
+    void> sort_impl(Container<T, Allo> &container, Comp &comp) {
+  std::sort(container.begin(), container.end(), comp);
+}
+
+//! sort's(comp) helper for std::array
+template <class T, size_t N, class Comp>
+inline void sort_impl(std::array<T, N> &container, Comp &comp) {
+  std::sort(container.begin(), container.end(), comp);
+}
+
+} // namespace detail_algorithm_trx
 
 //! Searches for the best element among those for which predicate returns true.
 /*!
@@ -168,8 +194,8 @@ inline Arg max_among_trunc(const Arg &first, const Args&... rest) {
   sort(vtr);
 */
 template <class Container>
-void sort(Container &container) {
-  detail_trx::sort_impl(container);
+inline void sort(Container &container) {
+  detail_algorithm_trx::sort_impl(container);
 }
 
 //! Sorts the given standard container in ascending order.
@@ -195,8 +221,8 @@ void sort(Container &container) {
   sort(vtr, std::greater<>());
 */
 template <class Container, class Comp>
-void sort(Container &container, Comp comp) {
-  detail_trx::sort_impl(container, comp);
+inline void sort(Container &container, Comp comp) {
+  detail_algorithm_trx::sort_impl(container, comp);
 }
 
 } // namespace trx
